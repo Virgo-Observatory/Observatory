@@ -6,6 +6,7 @@
 
 #include <LiquidCrystal_I2C.h>
 
+#include<stdlib.h>
 
 class Observatory {
   public:
@@ -19,7 +20,7 @@ class Observatory {
 
     void focuser();
 
-    bool qhy_camera(bool stat_qhy);
+    void qhy_camera();
 
     bool IR_lamp(bool stat_ir);
 
@@ -46,6 +47,7 @@ class Observatory {
 
     const static int stepsPerRevolution = 200;
     const static int stepper_speed = 60;
+    
 
     const static int step1 = 6; 
     const static int step2 = 9;
@@ -61,5 +63,9 @@ class Observatory {
     int dht_pin;
     int r1;
     int r2;
+
+    // DHT measures
+    float h;
+    float t;
 
 };

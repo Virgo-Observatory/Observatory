@@ -60,7 +60,7 @@ void Observatory::focuser(){
 
 }
 
-bool Observatory::qhy_camera(bool stat_qhy){
+void Observatory::qhy_camera(){
 
     Serial.println("Camera Setting");
     Serial.print("Camera power status: ");
@@ -78,8 +78,6 @@ bool Observatory::qhy_camera(bool stat_qhy){
 
     Serial.print("Camera power status: ");
     Serial.println(stat_qhy);
-
-    return stat_qhy;
 
 }
 
@@ -103,20 +101,28 @@ void Observatory::get_status(){
     Serial.println("Observatory Status");
     Serial.println("==================");
     Serial.println("===  Devices   ===");
-    Serial.println("IR-LAMP :");
-    Serial.println("QHY-CCD :");
+    Serial.print("IR-LAMP : ");
+    if(stat_ir){
+        Serial.println("Power-ON");
+    } else {
+        Serial.println("Power-OFF");
+    }
+   
+    Serial.print("QHY-CCD : ");
+    if(stat_qhy){
+        Serial.println("Power-ON");
+    } else {
+        Serial.println("Power-OFF");
+    }
+   
     Serial.println("=== Atmosphere ===");
-    Serial.println("Tatm    :");
-    Serial.println("Humidity:");
+    Serial.print("Tatm    : ");
+    Serial.print(t);
+    Serial.println("C");
+    Serial.print("Humidity: ");
+    Serial.print(h);
+    Serial.println("%");
     Serial.println("=== Telescope  ===");
-    Serial.println("T1:");
-    Serial.println("T2:");
-    Serial.println("T4:");
-    Serial.println("==================");
-
-}
-
-void Observatory::get_temperatures(){
 
     temp_sensors->requestTemperatures();
 
@@ -127,48 +133,66 @@ void Observatory::get_temperatures(){
         Serial.print(temp_sensors->getTempCByIndex(i));
         Serial.println("C");
     }
+    Serial.println("==================");
+
+}
+
+void Observatory::get_temperatures(){
+
+    temp_sensors->requestTemperatures();
+    Serial.println("==================");
+    for(int i=0; i<deviceCount; i++){
+        Serial.print("Sensor ");
+        Serial.print(i+1);
+        Serial.print(" : ");
+        Serial.print(temp_sensors->getTempCByIndex(i));
+        Serial.println("C");
+    }
     
-    Serial.println(" ");
-    Serial.println(" ");
 }
 
 void Observatory::control_status(){
 
     String in = Serial.readStringUntil('\n');
 
-    if((in == String("Camera\n")) || (in == String("camera\n")))
+    if((in == String("Camera")) || (in == String("camera")))
     {
-        qhy_camera(true);
+        qhy_camera();
     }
 
-    if ((in == String("Focuser\n")) || (in == String("focuser\n"))) 
+    if ((in == String("Focuser")) || (in == String("focuser"))) 
     {
         focuser();
     }
     
-    if ((in == String("IrLamp\n")) || (in == String("irlamp\n")))
+    if ((in == String("IrLamp")) || (in == String("irlamp")))
     {
         IR_lamp(true);
     }
 
-    if ((in == String("Status\n")) || (in == String("status\n")))
+    if ((in == String("Status")) || (in == String("status")))
     {
         get_status();
     }
 
-    if ((in == String("Temperatures\n")) || (in == String("temperatures\n")))
+    if ((in == String("Temperatures")) || (in == String("temperatures")))
     {
+        // This function returns the temperature of specific parts of the telescope.
         get_temperatures();
     }
 
+    // Atmospheric data (Data acquired by the DHT11 sensors)
+    h = dht_sensor->readHumidity();
+    t = dht_sensor->readTemperature();
 
-/*    if( h > 80. ){
+
+    if( h > 80. ){
         IR_lamp(true);  
     }
     if( h < 50. ) {
         IR_lamp(false);
     }
-*/
+
     
 }
 
