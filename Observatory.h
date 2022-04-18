@@ -39,11 +39,14 @@ class Observatory {
     OneWire *wire;
     DallasTemperature *temp_sensors;
     DHT *dht_sensor;
+    LiquidCrystal_I2C *lcd;
+
 
     bool stat_ir;
     bool stat_qhy;
     bool stat_obs;
     int deviceCount;
+    String name[5];
 
     const static int stepsPerRevolution = 200;
     const static int stepper_speed = 60;
