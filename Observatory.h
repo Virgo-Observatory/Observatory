@@ -13,16 +13,14 @@ class Observatory {
     Observatory(int qhy_cam_pin, 
                 int ir_pin, 
                 int temp_pin, 
-                int dht_pin,
-                int r1,
-                int r2);
+                int dht_pin);
     ~Observatory();
 
     void focuser();
 
-    void qhy_camera();
+    void qhy_camera(bool stat_qhy);
 
-    bool IR_lamp(bool stat_ir);
+    void IR_lamp(bool stat_ir);
 
     void get_status();
 
@@ -51,14 +49,11 @@ class Observatory {
     const static int stepsPerRevolution = 200;
     const static int stepper_speed = 60;
     
-
+    // Step motor pins
     const static int step1 = 6; 
     const static int step2 = 9;
     const static int step3 = 10; 
     const static int step4 = 11;
-
-    const static int relay_1 = 4;
-    const static int relay_2 = 7;
 
     int qhy_cam_pin;
     int ir_pin;

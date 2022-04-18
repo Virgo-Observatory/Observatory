@@ -2,21 +2,38 @@
 #include <LiquidCrystal_I2C.h>
 #include <stdio.h>
 
-Observatory::Observatory(int qhy_cam_pin, int ir_pin, int temp_pin, int dht_pin, int r1, int r2) {
+Observatory::Observatory(int qhy, int ir, int temp_pin, int dht_pin){
   
+    qhy_cam_pin = qhy;
+    ir_pin = ir;
+
+    stat_qhy = false;
+    stat_ir = false;
+
     /* Define the main object of the observatory:
        - Stepper motor of the focuser
        - The one-wire object for DallasTemperature sensors
        - The Dallas sensors
        - The atmospheric Temperature and Humidity sensors.
     */
+
     lcd = new LiquidCrystal_I2C(0x27, 16, 2);
+    
+    // Set-up the motor and put down all the inputs.
     step_motor = new Stepper(stepsPerRevolution, step1, step2, step3, step4);
+    digitalWrite(step1, LOW);
+    digitalWrite(step2, LOW);
+    digitalWrite(step3, LOW);
+    digitalWrite(step4, LOW); 
+
+    // Define the wire of the DallasT temperature sensors.
     wire = new OneWire(temp_pin);
     temp_sensors = new DallasTemperature(wire);
+
+    // Atmospheric temperature and humidity,
     dht_sensor = new DHT(dht_pin, DHT11);
 
-    // LiquidCrystal initialization
+    // LiquidCrystal initialization.
     lcd->init();
     lcd->clear();
     lcd->backlight();
@@ -31,6 +48,10 @@ Observatory::Observatory(int qhy_cam_pin, int ir_pin, int temp_pin, int dht_pin,
     // IR lamp off
     pinMode(ir_pin, OUTPUT);
     digitalWrite(ir_pin, LOW);
+
+    // Dopo aver inizializzato l'impedenza dei PIN, posso lavorarci.
+    // qhy_camera(false)
+    IR_lamp(false);
 
     delay(500);
 
@@ -83,47 +104,44 @@ void Observatory::focuser(){
 
 }
 
-void Observatory::qhy_camera(){
-
-    Serial.println("Camera Setting");
-    Serial.print("Camera power status: ");
-    Serial.println(stat_qhy);
-    Serial.println("What do you want to do? (use 0/1 to switch off/on, respectively");
-    while(Serial.available() == 0) {}
-
-    String cam_status_now = Serial.readStringUntil('\n');
-    int rel_stat = cam_status_now.toInt();
-
-    if (rel_stat == 1) stat_qhy == true;
-    else stat_qhy = false;
-
-    digitalWrite(qhy_cam_pin, rel_stat);
+void Observatory::qhy_camera(bool qhy){
 
     Serial.print("Camera power status: ");
-    Serial.println(stat_qhy);
+    if (qhy){ 
+        digitalWrite(qhy_cam_pin, HIGH);
+        Serial.println("QHY Switched on");
+
+    } else { 
+        digitalWrite(qhy_cam_pin, LOW);
+        Serial.println("QHY Switched off");
+    }
 
 }
 
-bool Observatory::IR_lamp(bool stat_ir){
+void Observatory::IR_lamp(bool stat_ir){
 
     if(stat_ir) {
         digitalWrite(ir_pin, HIGH);
-        stat_ir = !stat_ir;
+        Serial.println("IR-Lamp switched on");
+        stat_ir = stat_ir;
+        Serial.print("Status: ");
+        if(stat_ir) Serial.println("ON");
+        else Serial.println("OFF");
+
     } else {
         digitalWrite(ir_pin, LOW);
-        stat_ir = !stat_ir;
+        Serial.println("IR-Lamp switched off");
+        stat_ir = stat_ir;
     }
-
-    return stat_ir;
-
 }
 
 void Observatory::get_status(){
 
-    Serial.println("==================");
+    Serial.println("=========================");
     Serial.println("Observatory Status");
-    Serial.println("==================");
-    Serial.println("===  Devices   ===");
+    Serial.println("=========================");
+    Serial.println("=======  Devices   ======");
+    Serial.println("=========================");
     Serial.print("IR-LAMP : ");
     if(stat_ir){
         Serial.println("Power-ON");
@@ -138,14 +156,14 @@ void Observatory::get_status(){
         Serial.println("Power-OFF");
     }
    
-    Serial.println("=== Atmosphere ===");
+    Serial.println("====== Atmosphere =======");
     Serial.print("Tatm    : ");
     Serial.print(t);
     Serial.println("C");
     Serial.print("Humidity: ");
     Serial.print(h);
     Serial.println("%");
-    Serial.println("=== Telescope  ===");
+    Serial.println("======= Telescope =======");
 
     temp_sensors->requestTemperatures();
 
@@ -156,7 +174,8 @@ void Observatory::get_status(){
         Serial.print(temp_sensors->getTempCByIndex(i));
         Serial.println("C");
     }
-    Serial.println("==================");
+
+    Serial.println("=========================");
 
 }
 
@@ -187,8 +206,18 @@ void Observatory::control_status(){
       */ 
     if((in == String("Camera")) || (in == String("camera")))
     {
-        // Switch on/off the guiding camera
-        qhy_camera();
+        Serial.print("Camera Setting, digit 1/0 for swithing on/off");
+        while(Serial.available() == 0) {}
+        String c = Serial.readStringUntil('\n');
+        int ch = c.toInt();
+
+        if(ch == 1){
+            qhy_camera(true);
+            stat_qhy = true;
+        } else {
+            qhy_camera(false);
+            stat_qhy = false;
+        }
     }
 
     if ((in == String("Focuser")) || (in == String("focuser"))) 
@@ -200,7 +229,8 @@ void Observatory::control_status(){
     if ((in == String("IrLamp")) || (in == String("irlamp")))
     {
         // Switch-on the infrared lamp
-        IR_lamp(true);
+        stat_ir = !stat_ir;
+        IR_lamp(stat_ir);
     }
 
     if ((in == String("Status")) || (in == String("status")))
@@ -225,22 +255,22 @@ void Observatory::control_status(){
     t = dht_sensor->readTemperature();
 
     // Control the Humidity
-    if( h > 70. ){
-        IR_lamp(true);  
-    }
-    if( h < 50. ) {
-        IR_lamp(false);
-    }
+    // if( h > 70. ){
+    //     IR_lamp(true);  
+    // }
+    // if( h < 50. ) {
+    //     IR_lamp(false);
+    // }
 
     lcd->clear();
-    lcd->print("Temperature: ");
-    lcd->println(t);
+    lcd->print("Temp: ");
+    lcd->print(t);
+    lcd->print("C");
     lcd->setCursor(0, 1);
-    lcd->print("Humidity: ");
+    lcd->print("Hum : ");
     lcd->print(h);
-
-
-    
+    lcd->print("%");
+   
 }
 
 void Observatory::setup(){

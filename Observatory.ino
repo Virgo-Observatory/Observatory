@@ -5,24 +5,24 @@
 #include <DallasTemperature.h>
 #include "Observatory.h"
 
-const static int stepsPerRevolution = 200;
+// Temperature and Humidity sensor
+int dht_pin = 2;
 
-const static int temp_pin = 3; //??
+// DallasTemperature sensors (read with OneWire)
+const static int temp_pin = 3;
 
-const static int r1 = 4;
-const static int r2 = 7;
-
+// Relay connected to the IR-Lamp and to the QHY camera
 const static int switch_ir = 8;
 const static int switch_cam = 12;
 
-int dht_pin = 2;
+// Speed and step of the motor
+const static int stepsPerRevolution = 200;
+const static int stepper_speed = 60;
 
-const static int stepper_speed = 60; // The speed is set in RPM 
+// Serial port baud-rate
 const static int serial_speed = 9600;
 
-bool cam_stat = false;
-bool IR_stat = true;
-
+// Inizialize the object "Observatory" as a pointer.
 Observatory *obs;
 
 void setup() {
@@ -35,11 +35,19 @@ void setup() {
   Serial.println("**********************************************");
 
   // Create the observatory object and set-up the pins
-  obs = new Observatory(switch_cam, switch_ir, temp_pin, dht_pin, r1, r2);
+  obs = new Observatory(switch_cam, switch_ir, temp_pin, dht_pin);
   
 }
 
 void loop() {
+
+  /*I would like to implement a sort of interactive shell with two main environment:
+    - The first env is dedicated to the control of the observatory durin the daylight
+      and during the non-observative nights
+    - The second env will be dedicated to directly interact with the devices. For example,
+      swith on/off the irlamp for brief inspection of the telescope connections, focuser,
+      and other ancillary option that will be implemented in time.
+  */
 
   obs->control_status();
 
