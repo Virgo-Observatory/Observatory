@@ -21,6 +21,7 @@ Observatory::Observatory(int qhy, int ir, int temp_pin, int dht_pin){
     
     // Set-up the motor and put down all the inputs.
     step_motor = new Stepper(stepsPerRevolution, step1, step2, step3, step4);
+    step_motor->setSpeed(stepper_speed);
     digitalWrite(step1, LOW);
     digitalWrite(step2, LOW);
     digitalWrite(step3, LOW);

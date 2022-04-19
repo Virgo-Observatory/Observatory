@@ -39,7 +39,6 @@ class Observatory {
     DHT *dht_sensor;
     LiquidCrystal_I2C *lcd;
 
-
     bool stat_ir;
     bool stat_qhy;
     bool stat_obs;
