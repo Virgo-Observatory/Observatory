@@ -2,8 +2,7 @@
 #include <LiquidCrystal_I2C.h>
 #include <stdio.h>
 
-Observatory::Observatory(int qhy, int ir, int temp_pin, int dht_pin){
-  
+Observatory::Observatory(int qhy, int ir, int temp_pin, int dht_pin, Stepper *step){
     qhy_cam_pin = qhy;
     ir_pin = ir;
 
@@ -20,12 +19,14 @@ Observatory::Observatory(int qhy, int ir, int temp_pin, int dht_pin){
     lcd = new LiquidCrystal_I2C(0x27, 16, 2);
     
     // Set-up the motor and put down all the inputs.
-    step_motor = new Stepper(stepsPerRevolution, step1, step2, step3, step4);
+    step_motor = step;
+    // step_motor = new Stepper(stepsPerRevolution, step1, step2, step3, step4);
     step_motor->setSpeed(stepper_speed);
     digitalWrite(step1, LOW);
     digitalWrite(step2, LOW);
     digitalWrite(step3, LOW);
-    digitalWrite(step4, LOW); 
+    digitalWrite(step4, LOW);
+
 
     // Define the wire of the DallasT temperature sensors.
     wire = new OneWire(temp_pin);
@@ -76,7 +77,6 @@ Observatory::Observatory(int qhy, int ir, int temp_pin, int dht_pin){
 Observatory::~Observatory(){
 
     // Free the allocated memory
-    delete[] step_motor;
     delete[] wire;
     delete[] temp_sensors;
     delete[] dht_sensor;
@@ -95,7 +95,7 @@ void Observatory::focuser(){
     Serial.print(rounds);
     Serial.print(" rounds .... ");
 
-    Serial.print(" steps...");
+    Serial.print(" steps...");  
     step_motor->step(rounds);
     Serial.println(" DONE");
     digitalWrite(step1, LOW);

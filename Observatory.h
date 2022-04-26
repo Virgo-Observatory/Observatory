@@ -13,7 +13,8 @@ class Observatory {
     Observatory(int qhy_cam_pin, 
                 int ir_pin, 
                 int temp_pin, 
-                int dht_pin);
+                int dht_pin,
+                Stepper *step);
     ~Observatory();
 
     void focuser();
@@ -64,5 +65,7 @@ class Observatory {
     // DHT measures
     float h;
     float t;
+
+    // Stepper motor
 
 };

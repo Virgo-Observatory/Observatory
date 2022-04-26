@@ -25,6 +25,8 @@ const static int serial_speed = 9600;
 // Inizialize the object "Observatory" as a pointer.
 Observatory *obs;
 
+Stepper step = Stepper(stepsPerRevolution, 6, 9, 10, 11);
+
 void setup() {
 
   // Init the serial cominication
@@ -35,7 +37,7 @@ void setup() {
   Serial.println("**********************************************");
 
   // Create the observatory object and set-up the pins
-  obs = new Observatory(switch_cam, switch_ir, temp_pin, dht_pin);
+  obs = new Observatory(switch_cam, switch_ir, temp_pin, dht_pin, &step);
   
 }
 
@@ -48,7 +50,7 @@ void loop() {
       swith on/off the irlamp for brief inspection of the telescope connections, focuser,
       and other ancillary option that will be implemented in time.
   */
-
+  
   obs->control_status();
 
 }
