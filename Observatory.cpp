@@ -208,7 +208,7 @@ void Observatory::control_status(){
     if((in == String("Camera")) || (in == String("camera")))
     {
         Serial.print("Camera Setting, digit 1/0 for swithing on/off");
-        while(Serial.available() == 0) {}
+        // while(Serial.available() == 0) {}
         String c = Serial.readStringUntil('\n');
         int ch = c.toInt();
 
