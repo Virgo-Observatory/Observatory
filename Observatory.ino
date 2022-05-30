@@ -6,7 +6,11 @@
 #include "Observatory.h"
 
 // Temperature and Humidity sensor
-int dht_pin = 2;
+int dht_pin = 13;
+
+// Interrupts dedicated to the wind step_count
+int wind_pin = 2;
+int count_wind = 0;
 
 // DallasTemperature sensors (read with OneWire)
 const static int temp_pin = 3;
@@ -39,6 +43,8 @@ void setup() {
   // Create the observatory object and set-up the pins
   obs = new Observatory(switch_cam, switch_ir, temp_pin, dht_pin, &step);
   
+  attachInterrupt(digitalPinToInterrupt(wind_pin), count_wind_step, CHANGE);
+  
 }
 
 void loop() {
@@ -53,4 +59,12 @@ void loop() {
   
   obs->control_status();
 
+}
+
+void count_wind_step(){
+
+  count_wind = count_wind + 1;
+  Serial.print("Count: ");
+  Serial.println(count_wind);
+  
 }

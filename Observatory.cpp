@@ -20,6 +20,7 @@ Observatory::Observatory(int qhy, int ir, int temp_pin, int dht_pin, Stepper *st
     
     // Set-up the motor and put down all the inputs.
     step_motor = step;
+    
     // step_motor = new Stepper(stepsPerRevolution, step1, step2, step3, step4);
     step_motor->setSpeed(stepper_speed);
     digitalWrite(step1, LOW);
@@ -39,6 +40,7 @@ Observatory::Observatory(int qhy, int ir, int temp_pin, int dht_pin, Stepper *st
     lcd->init();
     lcd->clear();
     lcd->backlight();
+    stat_lcd = true;
     lcd->print("Weather Station");
     lcd->setCursor(0, 1);
     lcd->print("Virgo Obs. M15");
@@ -136,6 +138,15 @@ void Observatory::IR_lamp(bool stat_ir){
     }
 }
 
+void Observatory::backlight_switch(bool stat_lcd){
+    if(stat_lcd){
+        lcd->backlight();
+
+    } else {
+        lcd->noBacklight();
+    }
+}
+
 void Observatory::get_status(){
 
     Serial.println("=========================");
@@ -152,6 +163,13 @@ void Observatory::get_status(){
    
     Serial.print("QHY-CCD : ");
     if(stat_qhy){
+        Serial.println("Power-ON");
+    } else {
+        Serial.println("Power-OFF");
+    }
+
+    Serial.print("LCD-Stat: ");
+    if(stat_lcd){
         Serial.println("Power-ON");
     } else {
         Serial.println("Power-OFF");
@@ -249,6 +267,12 @@ void Observatory::control_status(){
     if ((in == String("scani2c")) || (in == String("Scan_I2C")))
     {
         scan_i2c_dev();
+    }
+
+    if ((in == String("backlight")) || (in == String("display")))
+    {
+        stat_lcd = !stat_lcd;
+        backlight_switch(stat_lcd);
     }
 
     // Atmospheric data (Data acquired by the DHT11 sensors)

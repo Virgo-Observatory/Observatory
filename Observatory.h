@@ -21,6 +21,8 @@ class Observatory {
 
     void qhy_camera(bool stat_qhy);
 
+    void backlight_switch(bool stat_lcd);
+
     void IR_lamp(bool stat_ir);
 
     void get_status();
@@ -43,6 +45,7 @@ class Observatory {
     bool stat_ir;
     bool stat_qhy;
     bool stat_obs;
+    bool stat_lcd;
     int deviceCount;
     String name[5];
 
@@ -59,6 +62,7 @@ class Observatory {
     int ir_pin;
     int temp_pin;
     int dht_pin;
+    int wind_pin;
     int r1;
     int r2;
 
