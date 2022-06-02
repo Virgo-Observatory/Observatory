@@ -35,6 +35,8 @@ class Observatory {
 
     void scan_i2c_dev();
 
+    void set_wind_speed(double w);
+
   private:
     Stepper *step_motor;
     OneWire *wire;
@@ -62,14 +64,12 @@ class Observatory {
     int ir_pin;
     int temp_pin;
     int dht_pin;
-    int wind_pin;
     int r1;
     int r2;
 
     // DHT measures
     float h;
     float t;
-
-    // Stepper motor
+    float wind_speed=0;
 
 };

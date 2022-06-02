@@ -7,10 +7,14 @@
 
 // Temperature and Humidity sensor
 int dht_pin = 13;
+double radius = 40; // mm
 
 // Interrupts dedicated to the wind step_count
 int wind_pin = 2;
-int count_wind = 0;
+double wind_speed;
+volatile unsigned long time=0;
+volatile unsigned long time_new;
+volatile unsigned long dt=0; // ms
 
 // DallasTemperature sensors (read with OneWire)
 const static int temp_pin = 3;
@@ -43,7 +47,7 @@ void setup() {
   // Create the observatory object and set-up the pins
   obs = new Observatory(switch_cam, switch_ir, temp_pin, dht_pin, &step);
   
-  attachInterrupt(digitalPinToInterrupt(wind_pin), count_wind_step, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(wind_pin), count_wind_step, RISING);
   
 }
 
@@ -54,7 +58,7 @@ void loop() {
       and during the non-observative nights
     - The second env will be dedicated to directly interact with the devices. For example,
       swith on/off the irlamp for brief inspection of the telescope connections, focuser,
-      and other ancillary option that will be implemented in time.
+      and other ancillary options that will be implemented in time.
   */
   
   obs->control_status();
@@ -63,8 +67,12 @@ void loop() {
 
 void count_wind_step(){
 
-  count_wind = count_wind + 1;
-  Serial.print("Count: ");
-  Serial.println(count_wind);
-  
+  time_new = millis();
+  dt = time_new-time;
+  time = time_new;
+
+  wind_speed = 3.6 * ( (2 * 3.141592 * radius) / dt );
+
+  obs->set_wind_speed(wind_speed);
+
 }

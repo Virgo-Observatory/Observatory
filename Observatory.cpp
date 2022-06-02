@@ -53,6 +53,9 @@ Observatory::Observatory(int qhy, int ir, int temp_pin, int dht_pin, Stepper *st
     pinMode(ir_pin, OUTPUT);
     digitalWrite(ir_pin, LOW);
 
+    // Wind pin
+    pinMode(2, INPUT);
+
     // Dopo aver inizializzato l'impedenza dei PIN, posso lavorarci.
     // qhy_camera(false)
     IR_lamp(false);
@@ -141,9 +144,11 @@ void Observatory::IR_lamp(bool stat_ir){
 void Observatory::backlight_switch(bool stat_lcd){
     if(stat_lcd){
         lcd->backlight();
+        Serial.println("Backlight ON");
 
     } else {
         lcd->noBacklight();
+        Serial.println("Backlight OFF");
     }
 }
 
@@ -178,10 +183,13 @@ void Observatory::get_status(){
     Serial.println("====== Atmosphere =======");
     Serial.print("Tatm    : ");
     Serial.print(t);
-    Serial.println("C");
+    Serial.println(" C");
     Serial.print("Humidity: ");
     Serial.print(h);
-    Serial.println("%");
+    Serial.println(" %");
+    Serial.print("Wind    : ");
+    Serial.print(wind_speed);
+    Serial.println(" km/h");
     Serial.println("======= Telescope =======");
 
     temp_sensors->requestTemperatures();
@@ -191,7 +199,7 @@ void Observatory::get_status(){
         Serial.print(name[i]);
         Serial.print(" ");
         Serial.print(temp_sensors->getTempCByIndex(i));
-        Serial.println("C");
+        Serial.println(" C");
     }
 
     Serial.println("=========================");
@@ -225,18 +233,9 @@ void Observatory::control_status(){
       */ 
     if((in == String("Camera")) || (in == String("camera")))
     {
-        Serial.print("Camera Setting, digit 1/0 for swithing on/off");
-        // while(Serial.available() == 0) {}
-        String c = Serial.readStringUntil('\n');
-        int ch = c.toInt();
+        stat_qhy = !stat_qhy;
+        qhy_camera(stat_qhy);
 
-        if(ch == 1){
-            qhy_camera(true);
-            stat_qhy = true;
-        } else {
-            qhy_camera(false);
-            stat_qhy = false;
-        }
     }
 
     if ((in == String("Focuser")) || (in == String("focuser"))) 
@@ -303,6 +302,13 @@ void Observatory::setup(){
 
 }
 
+void Observatory::set_wind_speed(double w){
+
+    wind_speed = w;
+
+}
+
+
 void Observatory::scan_i2c_dev(){
     
     byte error, address;
@@ -329,6 +335,6 @@ void Observatory::scan_i2c_dev(){
     if (deviceCount == 0)
         Serial.println("No I2C devices found\n");
     else
-        Serial.println("done\n");
+        Serial.println("done");
 
 }
