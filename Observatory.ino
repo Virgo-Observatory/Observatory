@@ -7,7 +7,7 @@
 
 // Temperature and Humidity sensor
 int dht_pin = 13;
-double radius = 40; // mm
+double radius = 67; // mm
 
 // Interrupts dedicated to the wind step_count
 int wind_pin = 2;
