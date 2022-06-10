@@ -71,5 +71,6 @@ class Observatory {
     float h;
     float t;
     float wind_speed=0;
+    float max_wind_speed=0;
 
 };

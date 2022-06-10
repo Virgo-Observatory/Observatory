@@ -190,6 +190,9 @@ void Observatory::get_status(){
     Serial.print("Wind    : ");
     Serial.print(wind_speed);
     Serial.println(" km/h");
+    Serial.print("Max     : ");
+    Serial.print(max_wind_speed);
+    Serial.println(" km/h");
     Serial.println("======= Telescope =======");
 
     temp_sensors->requestTemperatures();
@@ -305,8 +308,13 @@ void Observatory::setup(){
 void Observatory::set_wind_speed(double w){
 
     wind_speed = w;
-
-}
+    if(w > max_wind_speed){
+        // The Max Speed has to be associated to a RTC using an arduino
+        // interrupt. Set speed -> Interrupt --> set_speed() -> get_time, and set_speed -> return (t, s)
+        // The couple (t, s) can be encapsulaed in some private varibles.
+        // The RT clock needs two pins for working. (!!!)
+        max_wind_speed = w;
+    }
 
 
 void Observatory::scan_i2c_dev(){
